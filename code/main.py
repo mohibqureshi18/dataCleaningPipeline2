@@ -23,10 +23,9 @@ if __name__ == "__main__":
 
     # cleaner
     cleaner = CleanData(df)
-    no_dupicates = cleaner.removeDuplicates()
-    cleaned_df = cleaner.handleMissingValues()
+    cleaner.removeDuplicates(), cleaner.handleMissingValues(), cleaner.fixDataTypes(), cleaner.fixTypos(), cleaner.cleanReportedOnline(), cleaner.removeInvalidValues(), cleaner.standardizeText()
+    cleaned_df = cleaner.getData()
 
-    
     # Analyze
     analyzer = EDA(cleaned_df)
     analyzer.dataInfo()

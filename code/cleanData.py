@@ -16,8 +16,21 @@ class CleanData:
     def handleMissingValues(self):
 
         # Numeric columns
+        self.df["suspect_age"].fillna(self.df["suspect_age"].median(), inplace=True)
+        self.df["victim_age"].fillna(self.df["victim_age"].median(), inplace=True)
+        # self.df["latitude"].fillna(self.df["latitude"].median(), inplace=True)
+        # self.df["longitude"].fillna(self.df["latitude"].median(), inplace=True)
+
+        # Text columns
+        self.df["victim_phone"].fillna("Unknown", inplace=True)
+        self.df["notes"].fillna("No Notes", inplace=True)
+
+        # Numeric columns
         numeric_cols = [
-            "latitude", "longitude", "badge_number",
+            "latitude",                                                     # =============================================================================
+                                                                             #YE Check krna hai k 176 kiu values missing hain ? jb k is ki dtye float hai.
+            "longitude",                                                    # ==============================================================================
+            "badge_number",
             "suspect_age", "victim_age",
             "num_arrests", "property_loss_usd"
         ]
@@ -125,13 +138,20 @@ class CleanData:
             "TRUE": True,
             "True": True,
             True: True,
+            "y": True,
+            "1": True,
+            1: True,
 
             "NO": False,
             "No": False,
             "no": False,
             "FALSE": False,
             "False": False,
-            False: False
+            False: False,
+            "n": False,
+            "0": False,
+            0: False
+
         }
 
         self.df["reported_online"] = self.df["reported_online"].map(mapping)

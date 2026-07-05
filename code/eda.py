@@ -10,11 +10,11 @@ class EDA:
         print("Data Info")
         self.df.info()
 
-        print("\nDescriptive Statistics")
-        print(self.df.describe())
+        # print("\nDescriptive Statistics")
+        # print(self.df.describe())
 
-        print("\nFirst 5 Rows")
-        print(self.df.head())
+        # print("\nFirst 5 Rows")
+        # print(self.df.head())
 
         print("\nMissing Values")
         print(self.df.isnull().sum())
