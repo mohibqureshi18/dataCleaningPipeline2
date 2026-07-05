@@ -2,6 +2,8 @@ from loadData import LoadData
 from cleanData import CleanData
 from eda import EDA
 
+import os # for exporting data in json format.
+
 
 import pandas as pd
 import numpy as np
@@ -29,3 +31,13 @@ if __name__ == "__main__":
     # Analyze
     analyzer = EDA(cleaned_df)
     analyzer.dataInfo()
+
+    os.makedirs("output", exist_ok=True)
+
+    cleaned_df.to_json(
+        "output/cleaned_crime_data.json",
+        orient="records",
+        indent=4
+    )
+
+    print("JSON file saved successfully in the output folder.")
