@@ -1,6 +1,7 @@
 from loadData import LoadData
-from cleanData import CleanData
-from eda import EDA
+# from cleanData import CleanData
+from clean_data import CleanData
+# from eda import EDA
 
 import os # for exporting data in json format.
 
@@ -10,34 +11,24 @@ import numpy as np
 
 
 if __name__ == "__main__":
-    FILE_PATH = r"C:\\Users\\mohib\\Desktop\\Mohib\\data-cleaning-pipeline\\Datasets\\messyCrimeDastaset\\crime_incidents_messy.csv"
+    CrimeDastaset = r"C:\\Users\\mohib\\Desktop\\Mohib\\data-cleaning-pipeline\\Datasets\\messyCrimeDastaset\\crime_incidents_messy.csv"
+    FraudDataset = r"C:\\Users\\mohib\\Desktop\\Mohib\\data-cleaning-pipeline\\Datasets\\FraudDataset\\creditcard.csv"
 
+    try:
+        print("loading file...")
 
-    #load data
-    loader = LoadData(FILE_PATH)
-    df = loader.loadData()
-    print(df.head(10))
+        Selected_dataset = int(input("Select a dataset for research:\n1 for CrimeDastaset\n2 for FraudDataset\t"))
 
-    # Analyze before clean
-    analyzer = EDA(df)
-    analyzer.dataInfo()
-
-
-    # cleaner
-    cleaner = CleanData(df)
-    cleaner.removeDuplicates(), cleaner.handleMissingValues(), cleaner.fixDataTypes(), cleaner.fixTypos(), cleaner.cleanReportedOnline(), cleaner.removeInvalidValues(), cleaner.standardizeText()
-    cleaned_df = cleaner.getData()
-
-    # Analyze
-    analyzer = EDA(cleaned_df)
-    analyzer.dataInfo()
-
-    os.makedirs("output", exist_ok=True)
-
-    cleaned_df.to_json(
-        "output/cleaned_crime_data.json",
-        orient="records",
-        indent=4
-    )
-
-    print("JSON file saved successfully in the output folder.")
+        if(Selected_dataset == 1):
+            loader = LoadData(CrimeDastaset)
+            df = loader.loadData()
+            print(df.head(4))
+        elif(Selected_dataset == 2):
+            loader = LoadData(FraudDataset)
+            df = loader.loadData()
+            print(df.head(4))
+        else:
+            print("\nPlease select 1 or 2")
+    
+    except FileNotFoundError as e:
+        print("file not found")
