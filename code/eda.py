@@ -7,14 +7,34 @@ class EDA:
         self.df = df
 
     def dataInfo(self):
-        print("Data Info")
+        print()
+        print("BASIC INFORMATION:")
         self.df.info()
+        print(f"\nShape of dataset:\t{self.df.shape}") 
+        print(f"\nColumns of Dataset:\t{self.df.columns}")
+        print(f"\nDataTypes of Dataset:\t{self.df.dtypes}")
+        print(f"\nDataTypes of Dataset:\t{self.df.dtypes}")
+              
+    def summary_statistics(self):
+        print(f"\nsummary_statistics of Dataset:\t{self.df.describe()}")
+    
+    def missing_values(self):
+        print(f"\nMissing values of each column:\t{self.df.isnull().sum()}")
 
-        print("\nDescriptive Statistics")
-        print(self.df.describe())
+    def duplicate_rows(self):
+        print(f"\nDuplicate Rows:\t{self.df.duplicated().sum()}")
 
-        print("\nFirst 5 Rows")
-        print(self.df.head())
+    def unique_values(self):
+        print()
+        print(self.df.nunique())
 
-        print("\nMissing Values")
-        print(self.df.isnull().sum())
+    def full_report(self):
+        self.dataInfo()
+        self.summary_statistics()
+        self.missing_values()
+        self.duplicate_rows()
+        self.unique_values()
+
+#================================================
+# using matplot lib, i will use more EDA methods like Graphs, heatmaps, corelation heatmap...
+#================================================
