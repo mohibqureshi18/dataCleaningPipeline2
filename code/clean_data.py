@@ -8,5 +8,12 @@ class CleanData:
     def remove_duplicated(self):
         self.df.drop_duplicates(inplace=True)
         return self.df
-
     
+    
+    # def filter_rows(self, condition):
+    #     self.df = self.df[condition]
+    #     return self.df
+    
+
+    def missing_values(df):
+        print(df.isnull().any(axis=1))

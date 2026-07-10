@@ -13,7 +13,7 @@ class EDA:
         print(f"\nShape of dataset:\t{self.df.shape}") 
         print(f"\nColumns of Dataset:\t{self.df.columns}")
         print(f"\nDataTypes of Dataset:\t{self.df.dtypes}")
-        print(f"\nDataTypes of Dataset:\t{self.df.dtypes}")
+        # print(f"\nDataTypes of Dataset:\t{self.df.dtypes}")
               
     def summary_statistics(self):
         print(f"\nsummary_statistics of Dataset:\t{self.df.describe()}")
@@ -25,7 +25,6 @@ class EDA:
         print(f"\nDuplicate Rows:\t{self.df.duplicated().sum()}")
 
     def unique_values(self):
-        print()
         print(self.df.nunique())
 
     def full_report(self):
