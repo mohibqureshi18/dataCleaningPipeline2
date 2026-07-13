@@ -90,10 +90,8 @@ class LoadData:
                 if option_to_perforn_next_action == 1:
                     self.run_EDA(cleaned_DF)
                 elif option_to_perforn_next_action == 2:
-                    # expJson = Export(cleaned_DF)
-                    # expJson.ExportToJson()
-                    expJson = Export()
-                    expJson.ExportToJson(cleaned_DF)
+                    expJson = Export(cleaned_DF)
+                    expJson.ExportToJson()
                 elif option_to_perforn_next_action == 3:
                     print("Exiting...")
                     break
