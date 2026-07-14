@@ -1,15 +1,16 @@
 import pandas as pd 
 import numpy as np
-from eda import EDA
-from clean_data import CleanData
-from exportToJson import Export
+
+from Project.src.eda import EDA
+from Project.src.clean_data import CleanData
+from Project.src.exportToJson import Export
 
 class LoadData:
 
 
     def __init__(self):
-        self.CrimeDastaset = r"C:\\Users\\mohib\\Desktop\\Mohib\\data-cleaning-pipeline\\Datasets\\crime_incidents_messy.csv"
-        self.Mushrooms = r"C:\\Users\\mohib\\Desktop\\Mohib\\data-cleaning-pipeline\\Datasets\\Mushrooms.csv"
+        self.CrimeDastaset = r"C:\Users\mohib\Desktop\Mohib\data-cleaning-pipeline\Datasets\raw\crime_incidents_messy.csv"
+        self.Mushrooms = r"C:\Users\mohib\Desktop\Mohib\data-cleaning-pipeline\Datasets\raw\mushrooms.csv"
 
         
 
@@ -46,11 +47,12 @@ class LoadData:
 
     def run_EDA(self, dataset): 
         eda = EDA(dataset)
+
         while True:
 
             try:
 
-                checkDataInfo = int(input("\n\nselect 1 option:\n1: Basic Information.\n2: Descriptive Stats.\n3: Missing Values.\n4: Duplicates and Unique Values.\n5: Full Report.\n7: Exit"))
+                checkDataInfo = int(input("\n\nselect 1 option:\n1: Basic Information.\n2: Descriptive Stats.\n3: Missing Values.\n4: Duplicates and Unique Values.\n5: Full Report.\n6: Preprocessing\n7: Exit"))
                 if checkDataInfo == 1:
                     eda.dataInfo()
 
@@ -67,7 +69,7 @@ class LoadData:
                 elif checkDataInfo == 5:
                     eda.full_report()
                 elif checkDataInfo == 6:
-                    self.Preprocessing(df)
+                    self.Preprocessing(dataset)
                 
                 elif(checkDataInfo == 7):
                     break
@@ -76,7 +78,7 @@ class LoadData:
                     print("Invalid option.")
             
             except ValueError:
-                print("Please enter a valid number (1-6).")
+                print("Please enter a valid number (1-7).")
 
 
     
@@ -100,4 +102,3 @@ class LoadData:
 
             except ValueError:
                 print("Please enter a correct input...")
-         

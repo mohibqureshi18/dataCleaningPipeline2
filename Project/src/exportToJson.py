@@ -6,5 +6,5 @@ class Export:
 
 
     def ExportToJson(self):
-        self.Cleaned_Dataset.to_json("cleaned_dataset.json", orient="records")
+        self.Cleaned_Dataset.to_json(r"C:\\Users\\mohib\\Desktop\\Mohib\\data-cleaning-pipeline\\Datasets\\json\\cleaned_dataset.json", orient="records", indent=4)
         print("\n\tdata Exported successfully")
