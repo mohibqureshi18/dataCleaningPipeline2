@@ -10,8 +10,8 @@ class LoadData:
 
 
     def __init__(self):
-        self.CrimeDastaset = r"C:\Users\mohib\Desktop\Mohib\data-cleaning-pipeline\Datasets\raw\crime_incidents_messy.csv"
-        self.Mushrooms = r"C:\Users\mohib\Desktop\Mohib\data-cleaning-pipeline\Datasets\raw\mushrooms.csv"
+        self.CrimeDastaset = r"C:\\Users\\mohib\\Desktop\\Mohib\\data-cleaning-pipeline\\Datasets\\crime_incidents_messy.csv"
+        self.Mushrooms = r"C:\\Users\\mohib\\Desktop\\Mohib\\data-cleaning-pipeline\\Datasets\\mushrooms.csv"
 
         
 
