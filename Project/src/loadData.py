@@ -4,6 +4,7 @@ import numpy as np
 from Project.src.eda import EDA
 from Project.src.clean_data import CleanData
 from Project.src.exportToJson import Export
+from Project.Models.train import TrainModel
 
 class LoadData:
 
@@ -33,7 +34,7 @@ class LoadData:
 
 
         try:
-            option = int(input("\nwhat do you want to perform?\nPress 1 for EDA\nPress 2 for clean data"))
+            option = int(input("\nwhat do you want to perform?\nPress 1 for EDA\nPress 2 for clean data\t"))
             if(option == 1):
                 self.run_EDA(df)
             elif(option == 2): 
@@ -52,7 +53,8 @@ class LoadData:
 
             try:
 
-                checkDataInfo = int(input("\n\nselect 1 option:\n1: Basic Information.\n2: Descriptive Stats.\n3: Missing Values.\n4: Duplicates and Unique Values.\n5: Full Report.\n6: Preprocessing\n7: Exit"))
+                checkDataInfo = int(input("\n\nselect 1 option:\n1: Basic Information.\n2: Descriptive Stats.\n3: Missing Values." \
+                "\n4: Duplicates and Unique Values.\n5: Full Report.\n6: Preprocessing\n7: Exit\t"))
                 if checkDataInfo == 1:
                     eda.dataInfo()
 
@@ -88,13 +90,29 @@ class LoadData:
         cleaned_DF = clean_dataSet.Do_clean()
         while True:
             try:
-                option_to_perforn_next_action = int(input("What do you want to do next: 1) Analyze data 2) export dataset in json 3) Exit"))
+                option_to_perforn_next_action = int(input("What do you want to do next: \n1) Analyze data \n2) export dataset \n3) Train \n4) Exit\t"))
                 if option_to_perforn_next_action == 1:
                     self.run_EDA(cleaned_DF)
+
                 elif option_to_perforn_next_action == 2:
                     expJson = Export(cleaned_DF)
-                    expJson.ExportToJson()
+
+                    option_saveto = int(input("\nSave to 1) CSV\n2) json"))
+
+                    if option_saveto == 1:
+                        expJson.ExportToCSV()
+
+                    elif option_saveto == 2:
+                        expJson.ExportToJson()
+                    else:
+                        print("Please choose 1 or 2")
+                
                 elif option_to_perforn_next_action == 3:
+                    # train ?
+                    pass
+
+
+                elif option_to_perforn_next_action == 4:
                     print("Exiting...")
                     break
                 else:
