@@ -1,6 +1,9 @@
 import pandas as pd 
 import numpy as np
 
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
+
 from Project.src.eda import EDA
 from Project.src.clean_data import CleanData
 from Project.src.exportToJson import Export
@@ -10,28 +13,56 @@ class LoadData:
 
 
     def __init__(self):
-        self.CrimeDastaset = r"C:\\Users\\mohib\\Desktop\\Mohib\\data-cleaning-pipeline\\Datasets\\crime_incidents_messy.csv"
-        self.Mushrooms = r"C:\\Users\\mohib\\Desktop\\Mohib\\data-cleaning-pipeline\\Datasets\\mushrooms.csv"
+        pass
+        # try to make user Upload Dataset here
+        # self.OpenFile()
+        # self.CrimeDastaset = r"C:\\Users\\mohib\\Desktop\\Mohib\\data-cleaning-pipeline\\Datasets\\crime_incidents_messy.csv"
+        # self.Mushrooms = r"C:\\Users\\mohib\\Desktop\\Mohib\\data-cleaning-pipeline\\Datasets\\mushrooms.csv"
 
         
+    def OpenFileJson(self):
+        print("Opening file Exploer.")
+        fileName = askopenfilename(
+            title="Select a Json file:",
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")]
+        )
+        # df = pd.read_csv(fileName)
+        return fileName
+
+
+    def OpenFileCSV(self):
+        print("Opening file Exploer.")
+        fileName = askopenfilename(
+            title="Select a dataset:",
+            filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
+        )
+        # df = pd.read_csv(fileName)
+        return fileName
 
     def loadData(self):
+        DataFile=self.OpenFileCSV()
+        df = pd.read_csv(DataFile)
 
-        Selected_dataset = int(input("\nSelect a dataset for research:\n1 for CrimeDastaset\n2 for Mushrooms\t"))
+        self.selectOptionForDataset(df)
 
-        if(Selected_dataset == 1):
-            self.selectOptionForDataset(self.CrimeDastaset)
+    # def loadData(self):
 
-        elif(Selected_dataset == 2):
-            self.selectOptionForDataset(self.Mushrooms)
+    #     Selected_dataset = int(input("\nSelect a dataset for research:"))
 
-        else:
-            print("\nPlease select 1 or 2")
+    #     if(Selected_dataset == 1):
+    #         self.selectOptionForDataset(self.CrimeDastaset)
 
-    def selectOptionForDataset(self,  dataset):
+    #     elif(Selected_dataset == 2):
+    #         self.selectOptionForDataset(self.Mushrooms)
+
+    #     else:
+    #         print("\nPlease select 1 or 2")
+
+
+    
+
+    def selectOptionForDataset(self,  df):
         print("\nloading file...")
-        df = pd.read_csv(dataset)
-
 
         try:
             option = int(input("\nwhat do you want to perform?\nPress 1 for EDA\nPress 2 for clean data\t"))
@@ -86,7 +117,6 @@ class LoadData:
     
     def Preprocessing(self, dataset):         
         clean_dataSet = CleanData(dataset)
-        
         cleaned_DF = clean_dataSet.Do_clean()
         while True:
             try:
@@ -107,10 +137,9 @@ class LoadData:
                     else:
                         print("Please choose 1 or 2")
                 
-                elif option_to_perforn_next_action == 3:
-                    # train ?
-                    pass
-
+                elif option_to_perforn_next_action == 3: #train data here
+                    # user input for Cleaned dataset
+                    self.OpenFileJson()
 
                 elif option_to_perforn_next_action == 4:
                     print("Exiting...")
