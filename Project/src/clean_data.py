@@ -129,6 +129,28 @@ class CleanData:
 
         return self
     
+    def handle_outliers(self):
+        print("\nHandling outliers")
+
+        for col in self.df.select_dtypes(include = "number").columns:
+            Q1 = self.df[col].quantile(0.25)
+            Q3 = self.df[col].quantile(0.75)
+
+            IQR = Q3 - Q1
+
+            lower = Q1 - 1.5 * IQR
+            upper = Q3 + 1.5 * IQR
+
+            before = len(self.df)
+
+            self.df = self.df[
+                (self.df[col] >= lower) & (self.df[col]<=upper)
+            ]
+
+            removed = before - len(self.df)
+            print(f"{col}: Removed {removed} outlier(s)")
+
+        return self
     
     def index_reset(self):
         self.df = self.df.reset_index(drop =True)
@@ -141,7 +163,7 @@ class CleanData:
     def clean(self):
         print("\nCleaning Dataset...")
 
-        self.remove_duplicates_rows() .remove_duplicates_cols() .remove_empty() .replace_empty_strings
+        self.remove_duplicates_rows() .remove_duplicates_cols() .remove_empty() .replace_empty_strings() .handle_outliers()
         self.stip_spaces() .standardize_text(case="lower") .numeric_convert() .handle_missing_values() .index_reset()
 
         print("\nCleaning Completed")

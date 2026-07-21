@@ -166,8 +166,13 @@ class LoadData:
                     json_DF = pd.read_json(json_file_path)
     
                     target_column = input("\nEnter the name of the target column: ").strip()
-    
-                    train_data = TrainModel(json_DF, target_column)
+                    drop_columns = [
+                        "incident_id", "address", "latitude", "longitude", "incident_datetime", "officer_id", "officer_first_name", 
+                        "officer_last_name", "badge_number", "suspect_id", "suspect_first_name", "suspect_last_name", "victim_id", 
+                        "victim_first_name", "victim_last_name", "victim_phone", "notes"
+                    ]
+                    
+                    train_data = TrainModel(json_DF, target_column, columns_to_drop=drop_columns)
                     train_data.select_model_type()
 
                 elif option_to_perforn_next_action == 4:

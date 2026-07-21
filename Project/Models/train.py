@@ -4,7 +4,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.tree import DecisionTreeClassifier
-# from sklearn.tree import DecisionTreeRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.metrics import accuracy_score
 
 
@@ -21,9 +22,11 @@ Class functionality:
 """
 
 class TrainModel:
-    def __init__(self, datasetReceived, target_column):
+    def __init__(self, datasetReceived, target_column, columns_to_drop=None):
        self.df = datasetReceived
        self.target_column = target_column
+
+       self.columns_to_drop = columns_to_drop if columns_to_drop else []
 
        self.X=None
        self.y=None
@@ -37,14 +40,15 @@ class TrainModel:
 
     def select_model_type(self): # check: classification or regression
 
-        columns_to_drop = [
-            self.target_column, 'incident_id', 'address', 'latitude', 'longitude', 
-            'incident_datetime', 'officer_id', 'officer_first_name', 'officer_last_name', 
-            'badge_number', 'suspect_id', 'suspect_first_name', 'suspect_last_name', 
-            'victim_id', 'victim_first_name', 'victim_last_name', 'victim_phone', 'notes'
-        ]
+        # columns_to_drop = [
+        #     self.target_column, 'incident_id', 'address', 'latitude', 'longitude', 
+        #     'incident_datetime', 'officer_id', 'officer_first_name', 'officer_last_name', 
+        #     'badge_number', 'suspect_id', 'suspect_first_name', 'suspect_last_name', 
+        #     'victim_id', 'victim_first_name', 'victim_last_name', 'victim_phone', 'notes'
+        # ]
+        self.columns_to_drop = [self.target_column] + self.columns_to_drop
         
-        existing_drops = [col for col in columns_to_drop if col in self.df.columns]
+        existing_drops = [col for col in self.columns_to_drop if col in self.df.columns]
         
         self.X = self.df.drop(columns=existing_drops)
         self.y = self.df[self.target_column]
@@ -65,7 +69,32 @@ class TrainModel:
 
     # for regression:
     def process_regression_dataset(self):
-        pass
+        self.split_data()
+        self.train_regression_data()
+        self.evaluate_regression_model()
+
+
+
+
+
+    def train_regression_data(self):
+        self.model = LinearRegression()
+        self.model.fit(self.X_train, self.y_train)
+        print("\nModel trained")
+
+    def evaluate_regression_model(self):
+        prediction = self.model.predict(self.X_test)
+
+        mae = mean_absolute_error(self.y_test, prediction)
+        mse = mean_squared_error(self.y_test, prediction)
+        rmse = np.sqrt(mse)
+        r2 = r2_score(self.y_test, prediction)
+
+        print(f"\nMAE : {mae:.4f}")
+        print(f"MSE : {mse:.4f}")
+        print(f"RMSE: {rmse:.4f}")
+        print(f"R²  : {r2:.4f}")
+
 
 
     def encode_data(self):
