@@ -30,7 +30,7 @@ class CleanData:
 
     def remove_empty(self):
         self.df = self.df.dropna(how="all")
-        self.df = self.df.dropna(axis = 1, how="all")
+        # self.df = self.df.dropna(axis = 1, how="all")
         return self
     
     def replace_empty_strings(self):
@@ -129,27 +129,59 @@ class CleanData:
 
         return self
     
+    # def handle_outliers(self):
+    #     print("\nHandling outliers")
+
+    #     for col in self.df.select_dtypes(include = "number").columns:
+    #         Q1 = self.df[col].quantile(0.25)
+    #         Q3 = self.df[col].quantile(0.75)
+
+    #         IQR = Q3 - Q1
+
+    #         lower = Q1 - 1.5 * IQR
+    #         upper = Q3 + 1.5 * IQR
+
+    #         before = len(self.df)
+
+    #         self.df = self.df[
+    #             (self.df[col] >= lower) & (self.df[col]<=upper)
+    #         ]
+
+    #         removed = before - len(self.df)
+    #         print(f"{col}: Removed {removed} outlier(s)")
+
+    #     return self
+    
     def handle_outliers(self):
         print("\nHandling outliers")
+        
+        removed_in_pass = -1
+        pass_count = 1
+        
+        while removed_in_pass != 0:
+            before_total = len(self.df)
+            print(f"\n--- Outlier Pass {pass_count} ---")
+            
+            for col in self.df.select_dtypes(include="number").columns:
+                Q1 = self.df[col].quantile(0.25)
+                Q3 = self.df[col].quantile(0.75)
+                IQR = Q3 - Q1
 
-        for col in self.df.select_dtypes(include = "number").columns:
-            Q1 = self.df[col].quantile(0.25)
-            Q3 = self.df[col].quantile(0.75)
+                lower = Q1 - 1.5 * IQR
+                upper = Q3 + 1.5 * IQR
 
-            IQR = Q3 - Q1
+                before_col = len(self.df)
+                self.df = self.df[
+                    (self.df[col] >= lower) & (self.df[col] <= upper)
+                ]
+                removed = before_col - len(self.df)
+                if removed > 0:
+                    print(f"{col}: Removed {removed} outlier(s)")
 
-            lower = Q1 - 1.5 * IQR
-            upper = Q3 + 1.5 * IQR
-
-            before = len(self.df)
-
-            self.df = self.df[
-                (self.df[col] >= lower) & (self.df[col]<=upper)
-            ]
-
-            removed = before - len(self.df)
-            print(f"{col}: Removed {removed} outlier(s)")
-
+            removed_in_pass = before_total - len(self.df)
+            pass_count += 1
+            
+        print("\nAll outliers successfully handled across passes.")
         return self
     
     def index_reset(self):

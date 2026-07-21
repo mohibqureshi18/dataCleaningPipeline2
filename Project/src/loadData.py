@@ -60,7 +60,7 @@ class LoadData:
         print("\nloading file...")
 
         try:
-            option = int(input("\nwhat do you want to perform?\nPress 1 for EDA\nPress 2 for clean data\t"))
+            option = int(input("\nWhat do you want to perform?\n1) EDA\n2) Clean Data\nEnter choice: "))
             if(option == 1):
                 self.run_EDA(df)
             elif(option == 2): 
@@ -87,9 +87,10 @@ class LoadData:
 4. Duplicates & Unique Values
 5. Full Report
 6. Preprocessing
-7. Feature Relationships
-8. Detect Outliers
-9. Exit
+7. Numeric Correlation
+8. Categorical Correlation
+9. Detect Outliers
+10. Exit EDA
 
 ==================================================
 """)
@@ -120,14 +121,12 @@ class LoadData:
                     print("\nNumeric Correlation\n")
                     eda.numeric_correlation()
 
-                    # Uncomment if implemented
-                    # print("\nCategorical Correlation\n")
-                    # print(eda.categorical_correlation())
-
                 elif choice == 8:
+                    eda.categorical_correlation()
+                elif choice == 9:
                     eda.detect_outliers()
 
-                elif choice == 9:
+                elif choice == 10:
                     print("Exiting EDA...")
                     break
 
@@ -167,12 +166,14 @@ class LoadData:
     
                     target_column = input("\nEnter the name of the target column: ").strip()
                     drop_columns = [
-                        "incident_id", "address", "latitude", "longitude", "incident_datetime", "officer_id", "officer_first_name", 
-                        "officer_last_name", "badge_number", "suspect_id", "suspect_first_name", "suspect_last_name", "victim_id", 
-                        "victim_first_name", "victim_last_name", "victim_phone", "notes"
+                        "incident_id", "address", "latitude", "longitude", "incident_datetime", "officer_id", 
+                        "officer_first_name", "officer_last_name", "badge_number", "suspect_id", "suspect_first_name", 
+                        "suspect_last_name", "victim_id", "victim_first_name", "victim_last_name", "victim_phone", "notes"
                     ]
+
+                    model_type_selected_classification = input("\nEnter the name of Classificaltion Model:\n1) decision_tree\n2) gradient_boosting\n3) random_forest\n4) catboost").strip()
                     
-                    train_data = TrainModel(json_DF, target_column, columns_to_drop=drop_columns)
+                    train_data = TrainModel(json_DF, target_column, columns_to_drop = drop_columns, model_type=model_type_selected_classification)
                     train_data.select_model_type()
 
                 elif option_to_perforn_next_action == 4:

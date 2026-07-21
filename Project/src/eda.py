@@ -11,7 +11,10 @@ class EDA:
     def __init__(self, df):
         self.df = df
         self.numeric_features = self.df.select_dtypes(include = ['int64', 'float64']).columns
-        self.categorical_features = self.df.select_dtypes(include = ['object', 'category']).columns
+        # self.categorical_features = self.df.select_dtypes(include = ['object', 'category']).columns        
+        self.categorical_features = self.df.select_dtypes(
+            exclude = ['int64', 'float64']
+        ).columns
 
     def dataInfo(self):
         print()
@@ -38,12 +41,6 @@ class EDA:
 
     def unique_values(self):
         print(f"\n{self.df.nunique()}\n")
-
-
-    def box_plots(self):
-        pass
-
-
 
     def detect_outliers(self):
         for col in self.numeric_features:
@@ -78,65 +75,26 @@ class EDA:
         plt.show()
 
 
-    def categorical_correlation(self, max_unique = 20):
-        print("\nCategorical Corelation\n")
-
-        ignore_feature = []
-
-        for col in self.categorical_features:
-            unique = self.df[col].nunique(dropna=True)
-
-            if unique>max_unique:
-                ignore_feature.append(col)
+    def categorical_correlation(self, max_unique=20):
+        print("\nCATEGORICAL CORRELATION")
+        selected_features = [col for col in self.categorical_features if self.df[col].nunique(dropna=True) <= max_unique]
         
-        selected_features = [
-            col for col in self.categorical_features
-            if col not in ignore_feature
-        ]
-
-        print(f"\nIgnores features (>{max_unique} unique values)")
-        print(ignore_feature if ignore_feature else "None")
-
         results = []
-
         for i, feature1 in enumerate(selected_features):
             for feature2 in selected_features[i + 1:]:
-
-                table = pd.crosstab(
-                    self.df[feature1],
-                    self.df[feature2]
-                )
-
-                # Skip empty or degenerate tables
-                if table.shape[0]<2 or table.shape[1]<2:
+                table = pd.crosstab(self.df[feature1], self.df[feature2])
+                if table.shape[0] < 2 or table.shape[1] < 2:
                     continue
-
                 chi2, p, dof, expected = chi2_contingency(table)
-
-                results.append({
-                    "Feature1": feature1,
-                    "Feature2":feature2,
-                    "P-value": round(p,6)}
-                )
-
-            if not results:
-                print("\nNo categorical relationships found")
-                return
+                results.append({"Feature1": feature1, "Feature2": feature2, "P-value": round(p, 6)})
+                
+        if not results:
+            print("No valid categorical relationships found.")
+            return None
             
-            results_df = (
-                pd.DataFrame(results)
-                .sort_values("P-value")
-                .reset_index(drop=True)
-
-            )
-
-            print("\nCategorical Correlation (Chi-Square Test)")
-            print(results_df)
-
-            return results_df
-
-
-
+        results_df = pd.DataFrame(results).sort_values("P-value").reset_index(drop=True)
+        print(results_df)
+        return results_df
 
     def value_counts(self):
         for col in self.categorical_features:
@@ -156,4 +114,3 @@ class EDA:
         self.detect_outliers()
         self.numeric_correlation()
         self.categorical_correlation()
-        self.box_plots()
