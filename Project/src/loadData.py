@@ -14,10 +14,7 @@ class LoadData:
 
     def __init__(self):
         pass
-        # try to make user Upload Dataset here
-        # self.OpenFile()
-        # self.CrimeDastaset = r"C:\\Users\\mohib\\Desktop\\Mohib\\data-cleaning-pipeline\\Datasets\\crime_incidents_messy.csv"
-        # self.Mushrooms = r"C:\\Users\\mohib\\Desktop\\Mohib\\data-cleaning-pipeline\\Datasets\\mushrooms.csv"
+       
 
         
     def OpenFileJson(self):
@@ -26,7 +23,6 @@ class LoadData:
             title="Select a Json file:",
             filetypes=[("JSON files", "*.json"), ("All files", "*.*")]
         )
-        # df = pd.read_csv(fileName)
         return fileName
 
 
@@ -36,7 +32,6 @@ class LoadData:
             title="Select a dataset:",
             filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
         )
-        # df = pd.read_csv(fileName)
         return fileName
 
     def loadData(self):
@@ -77,47 +72,76 @@ class LoadData:
             return
 
 
-    def run_EDA(self, dataset): 
+    def run_EDA(self, dataset):
+
         eda = EDA(dataset)
 
         while True:
 
-            try:
+            print("""
+==================== EDA MENU ====================
 
-                checkDataInfo = int(input("\n\nselect 1 option:\n1: Basic Information.\n2: Descriptive Stats.\n3: Missing Values." \
-                "\n4: Duplicates and Unique Values.\n5: Full Report.\n6: Preprocessing\n7: Exit\t"))
-                if checkDataInfo == 1:
+1. Basic Information
+2. Descriptive Statistics
+3. Missing Values
+4. Duplicates & Unique Values
+5. Full Report
+6. Preprocessing
+7. Feature Relationships
+8. Detect Outliers
+9. Exit
+
+==================================================
+""")
+
+            try:
+                choice = int(input("Select an option: "))
+
+                if choice == 1:
                     eda.dataInfo()
 
-                elif checkDataInfo == 2:
+                elif choice == 2:
                     eda.summary_statistics()
 
-                elif checkDataInfo == 3:
+                elif choice == 3:
                     eda.missing_values()
 
-                elif checkDataInfo == 4:
+                elif choice == 4:
                     eda.duplicate_rows()
                     eda.unique_values()
 
-                elif checkDataInfo == 5:
+                elif choice == 5:
                     eda.full_report()
-                elif checkDataInfo == 6:
+
+                elif choice == 6:
                     self.Preprocessing(dataset)
-                
-                elif(checkDataInfo == 7):
+
+                elif choice == 7:
+                    print("\nNumeric Correlation\n")
+                    eda.numeric_correlation()
+
+                    # Uncomment if implemented
+                    # print("\nCategorical Correlation\n")
+                    # print(eda.categorical_correlation())
+
+                elif choice == 8:
+                    eda.detect_outliers()
+
+                elif choice == 9:
+                    print("Exiting EDA...")
                     break
 
                 else:
-                    print("Invalid option.")
-            
+                    print("Please select a number between 1 and 9.")
+
             except ValueError:
-                print("Please enter a valid number (1-7).")
+                print("Invalid input. Please enter a number.")
 
 
     
     def Preprocessing(self, dataset):         
         clean_dataSet = CleanData(dataset)
-        cleaned_DF = clean_dataSet.Do_clean()
+        cleaned_DF = clean_dataSet.clean()
         while True:
             try:
                 option_to_perforn_next_action = int(input("What do you want to do next: \n1) Analyze data \n2) export dataset \n3) Train \n4) Exit\t"))
@@ -137,9 +161,14 @@ class LoadData:
                     else:
                         print("Please choose 1 or 2")
                 
-                elif option_to_perforn_next_action == 3: #train data here
-                    # user input for Cleaned dataset
-                    self.OpenFileJson()
+                elif option_to_perforn_next_action == 3: # train data here
+                    json_file_path = self.OpenFileJson()
+                    json_DF = pd.read_json(json_file_path)
+    
+                    target_column = input("\nEnter the name of the target column: ").strip()
+    
+                    train_data = TrainModel(json_DF, target_column)
+                    train_data.select_model_type()
 
                 elif option_to_perforn_next_action == 4:
                     print("Exiting...")

@@ -1,21 +1,34 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import chi2_contingency
+
+
 
 class EDA:
 
     def __init__(self, df):
         self.df = df
+        self.numeric_features = self.df.select_dtypes(include = ['int64', 'float64']).columns
+        self.categorical_features = self.df.select_dtypes(include = ['object', 'category']).columns
 
     def dataInfo(self):
         print()
         print("BASIC INFORMATION:")
         self.df.info()
         print(f"\nShape of dataset:\t{self.df.shape}") 
-        print(f"\nColumns of Dataset:\t{self.df.columns}")
+        print(f"\nColumns of Dataset:\t{list(self.df.columns)}")
         print(f"\nDataTypes of Dataset:\t{self.df.dtypes}")
+
+        print("\nFEATURES DETAILS:")
+        print("\nNumeric:", self.numeric_features)
+        print("\nCategorical:", self.categorical_features)
               
     def summary_statistics(self):
-        print(f"\nsummary_statistics of Dataset:\n{self.df.describe()}\n")
+        print(f"\nsummary_statistics of Dataset:\n")
+        print(self.df.describe(include="all"))
+
     
     def missing_values(self):
         print(f"\nMissing values of each column:\n{self.df.isnull().sum()}\n")
@@ -26,13 +39,121 @@ class EDA:
     def unique_values(self):
         print(f"\n{self.df.nunique()}\n")
 
+
+    def box_plots(self):
+        pass
+
+
+
+    def detect_outliers(self):
+        for col in self.numeric_features:
+
+            Q1 = self.df[col].quantile(0.25)
+            Q3 = self.df[col].quantile(0.75)
+
+            IQR = Q3-Q1 
+
+            lower = Q1 - 1.5 * IQR
+            upper = Q3 + 1.5 * IQR
+
+            outliers = self.df[
+                (self.df[col] < lower) | (self.df[col] > upper)
+            ]
+            
+            print(f"{col}")
+            print(f"Lower Bound: {lower:.2f}")
+            print(f"Upper Bound: {upper:.2f}")
+            print(f"Outliers: {len(outliers)}")
+
+
+
+    def  numeric_correlation(self):
+        corr_matrix = self.df[self.numeric_features].corr()
+
+        plt.figure(figsize=(10,6))
+
+        sns.heatmap(
+            corr_matrix, annot=True, cmap="coolwarm"
+        )
+        plt.show()
+
+
+    def categorical_correlation(self, max_unique = 20):
+        print("\nCategorical Corelation\n")
+
+        ignore_feature = []
+
+        for col in self.categorical_features:
+            unique = self.df[col].nunique(dropna=True)
+
+            if unique>max_unique:
+                ignore_feature.append(col)
+        
+        selected_features = [
+            col for col in self.categorical_features
+            if col not in ignore_feature
+        ]
+
+        print(f"\nIgnores features (>{max_unique} unique values)")
+        print(ignore_feature if ignore_feature else "None")
+
+        results = []
+
+        for i, feature1 in enumerate(selected_features):
+            for feature2 in selected_features[i + 1:]:
+
+                table = pd.crosstab(
+                    self.df[feature1],
+                    self.df[feature2]
+                )
+
+                # Skip empty or degenerate tables
+                if table.shape[0]<2 or table.shape[1]<2:
+                    continue
+
+                chi2, p, dof, expected = chi2_contingency(table)
+
+                results.append({
+                    "Feature1": feature1,
+                    "Feature2":feature2,
+                    "P-value": round(p,6)}
+                )
+
+            if not results:
+                print("\nNo categorical relationships found")
+                return
+            
+            results_df = (
+                pd.DataFrame(results)
+                .sort_values("P-value")
+                .reset_index(drop=True)
+
+            )
+
+            print("\nCategorical Correlation (Chi-Square Test)")
+            print(results_df)
+
+            return results_df
+
+
+
+
+    def value_counts(self):
+        for col in self.categorical_features:
+
+            print(f"\n{self.df[col].value_counts()}")
+
+
     def full_report(self):
+
+        print("\nEXPLORATORY DATA ANALYSIS REPORT\n")
         self.dataInfo()
+
         self.summary_statistics()
         self.missing_values()
         self.duplicate_rows()
         self.unique_values()
-
-#================================================
-# using matplot lib, i will use more EDA methods like Graphs, heatmaps, corelation heatmap...
-#================================================
+        self.detect_outliers()
+        self.numeric_correlation()
+        self.categorical_correlation()
+        self.box_plots()

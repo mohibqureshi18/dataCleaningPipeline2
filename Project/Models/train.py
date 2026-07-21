@@ -35,18 +35,26 @@ class TrainModel:
 
        self.model = None
 
-    def select_model_type(self): #check: classification or regression
-        self.X = self.df.drop(columns =[self.target_column])
+    def select_model_type(self): # check: classification or regression
+
+        columns_to_drop = [
+            self.target_column, 'incident_id', 'address', 'latitude', 'longitude', 
+            'incident_datetime', 'officer_id', 'officer_first_name', 'officer_last_name', 
+            'badge_number', 'suspect_id', 'suspect_first_name', 'suspect_last_name', 
+            'victim_id', 'victim_first_name', 'victim_last_name', 'victim_phone', 'notes'
+        ]
+        
+        existing_drops = [col for col in columns_to_drop if col in self.df.columns]
+        
+        self.X = self.df.drop(columns=existing_drops)
         self.y = self.df[self.target_column]
 
-        if(self.y.dtype == 'object'):
+        if self.y.dtype == 'object':
             print("\nClassification Problem")
             self.process_categorical_dataset()
-
         else:
             print("\nRegression Problem")
             self.process_regression_dataset()
-
 
     # for categorical:
     def process_categorical_dataset(self):
@@ -72,17 +80,7 @@ class TrainModel:
                 encoder = LabelEncoder()
                 self.X[column] = encoder.fit_transform(self.X[column].astype(str))
 
-                #=======================================================
-
                 self.feature_encoders[column] = encoder
-
-                # safe playing here as """ encoder = LabelEncoder() """ runs new for each loop, causing it to forget the rules 
-                # defined for previous columns. 
-                # And at the end, only the rules for """ y """ will be remembered. 
-
-                # So use dictionary out side of the loop to store all rules.
-
-                #=======================================================
 
         self.target_encoder = LabelEncoder()
         self.y = self.target_encoder.fit_transform(self.y)
@@ -101,20 +99,9 @@ class TrainModel:
         self.model = DecisionTreeClassifier(random_state=42)
         self.model.fit(self.X_train, self.y_train)
         print("\nModel Trained")
-    
-
-        # model_to_train = int(input("\nSelect a model to train:\n1)Decision Tree\n====== No other model availible yet ======"))
-
-        # if(model_to_train == 1):
-            # self.model = DecisionTreeClassifier(random_state=42)
-            # self.model.fit(self.X_train, self.y_train)
-            # print("\nModel Trained")
-        # else:
-        #     pass
-
 
     def evaluate_model(self):
         prediction = self.model.predict(self.X_test)
-        accuracy = accuracy_score(self.y_test, prediction)
 
+        accuracy = accuracy_score(self.y_test, prediction)
         print(f"\nAccuracy: {accuracy:.2%}")
