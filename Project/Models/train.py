@@ -6,6 +6,12 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, accuracy_score
+from pandas.api.types import (
+    is_object_dtype,
+    is_string_dtype,
+    is_bool_dtype,
+    is_numeric_dtype,
+)
 
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from catboost import CatBoostClassifier
@@ -43,6 +49,19 @@ class TrainModel:
        self.scaler = StandardScaler()
        self.feature_encoders = {}
        self.target_encoder = None
+
+
+    def is_target_categorical(self):
+        target = self.df[self.target_column]
+
+        if (target.dtype == "object" or str(target.dtype) == "category" or target.dtype == "bool"):
+            return True
+
+        if is_numeric_dtype(target) and target.nunique() <= 20:
+            return True
+
+        return False
+
 
 
     def select_model_type(self): # check: classification or regression
@@ -115,10 +134,14 @@ class TrainModel:
         rmse = np.sqrt(mse)
         r2 = r2_score(self.y_test, prediction)
 
+        prediction = self.model.predict(self.X_test)
+
+        accuracy = accuracy_score(self.y_test, prediction)
+        print(f"\nAccuracy: {accuracy:.2%}")
+
         print(f"\nEVALUATION RESULT")
         print(f"MAE : {mae:.4f}")
         print(f"MSE : {mse:.4f}")
-        print(f"RMSE: {rmse:.4f}")
         print(f"R²  : {r2:.4f}\n")
 
     def encode_data(self):
@@ -183,6 +206,42 @@ class TrainModel:
                 verbose=0,
                 random_state=42
             )
+
+        elif self.model_type == "all":
+
+            models = {
+                "Decision Tree": DecisionTreeClassifier(random_state=42),
+
+                "Gradient Boosting": GradientBoostingClassifier(
+                    n_estimators=100,
+                    learning_rate=0.1,
+                    random_state=42
+                ),
+
+                "Random Forest": RandomForestClassifier(
+                    n_estimators=100,
+                    random_state=42
+                ),
+
+                "CatBoost": CatBoostClassifier(
+                    n_estimators=300,
+                    learning_rate=0.1,
+                    depth=6,
+                    verbose=0,
+                    random_state=42
+                )
+            }
+
+            self.models = {}
+
+            for name, model in models.items():
+                print(f"\nTraining {name}")
+                model.fit(self.X_train, self.y_train)
+                self.models[name] = model
+                print(f"{name} trained successfully.")
+
+            return
+
         else:
             raise ValueError("Unsported Model Type")
         
@@ -192,6 +251,19 @@ class TrainModel:
 
 
     def evaluate_model(self):
+
+        if self.model_type == "all":
+
+            for name, model in self.models.items():
+
+                prediction = model.predict(self.X_test)
+                accuracy = accuracy_score(self.y_test, prediction)
+
+                print(f"\n{name}")
+                print(f"Accuracy: {accuracy:.2%}")
+
+            return
+
         prediction = self.model.predict(self.X_test)
 
         accuracy = accuracy_score(self.y_test, prediction)

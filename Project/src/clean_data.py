@@ -4,7 +4,6 @@ import numpy as np
 
 # Class functionality :
 #     Remove Duplicates Rows 
-#     Remove Duplicates Columns
 #     Remove Empty rows or cols
 #     empty strings with NaN 
 #     Strip spaces
@@ -74,83 +73,65 @@ class CleanData:
 
         return self
 
-
-    def handle_missing_values(self, strategy="median"):
-        numeric = self.df.select_dtypes(
-            include = np.number
-        ).columns
-
-        categorical = self.df.select_dtypes(
-            exclude = np.number
-        ).columns
-
-        if strategy == "drop":
-            
-            self.df = self.df.dropna()
-
-
-        elif strategy == "mean":
-            self.df[numeric] =self.df[numeric].fillna(
-                self.df[numeric].mean()
-            )
-            for col in categorical:
-                mode = self.df[col].mode()
-                
-                if not mode.empty:
-                    self.df[col] = self.df[col].fillna(mode.iloc[0])
-
-
-
-        elif strategy == "median":
-            
-            self.df[numeric] = self.df[numeric].fillna(
-                self.df[numeric].median()
-            )
-            
-            for col in categorical:
-                mode = self.df[col].mode()
-
-                if not mode.empty:
-                    self.df[col] = self.df[col].fillna(mode.iloc[0])
-
-
-
-        elif strategy == "mode":
-            
-            for col in self.df.columns:
-                mode = self.df[col].mode()
-
-                if not mode.empty:
-                    self.df[col] = self.df[col].fillna(mode.iloc[0])
-
-
-        else:
-            print(f"\nstrategy must be 'drop', 'mean', 'median', 'mode'")
-
-        return self
     
-    # def handle_outliers(self):
-    #     print("\nHandling outliers")
+    def handle_missing_values(self):
+        self.df.dropna(inplace = True)
+        return self
 
-    #     for col in self.df.select_dtypes(include = "number").columns:
-    #         Q1 = self.df[col].quantile(0.25)
-    #         Q3 = self.df[col].quantile(0.75)
+    # def handle_missing_values(self, strategy="median"):
+    #     numeric = self.df.select_dtypes(
+    #         include = np.number
+    #     ).columns
 
-    #         IQR = Q3 - Q1
+    #     categorical = self.df.select_dtypes(
+    #         exclude = np.number
+    #     ).columns
 
-    #         lower = Q1 - 1.5 * IQR
-    #         upper = Q3 + 1.5 * IQR
+    #     if strategy == "drop":
+            
+    #         self.df = self.df.dropna()
 
-    #         before = len(self.df)
 
-    #         self.df = self.df[
-    #             (self.df[col] >= lower) & (self.df[col]<=upper)
-    #         ]
+    #     elif strategy == "mean":
+    #         self.df[numeric] =self.df[numeric].fillna(
+    #             self.df[numeric].mean()
+    #         )
+    #         for col in categorical:
+    #             mode = self.df[col].mode()
+                
+    #             if not mode.empty:
+    #                 self.df[col] = self.df[col].fillna(mode.iloc[0])
 
-    #         removed = before - len(self.df)
-    #         print(f"{col}: Removed {removed} outlier(s)")
+
+
+    #     elif strategy == "median":
+            
+    #         self.df[numeric] = self.df[numeric].fillna(
+    #             self.df[numeric].median()
+    #         )
+            
+    #         for col in categorical:
+    #             mode = self.df[col].mode()
+
+    #             if not mode.empty:
+    #                 self.df[col] = self.df[col].fillna(mode.iloc[0])
+
+
+
+    #     elif strategy == "mode":
+            
+    #         for col in self.df.columns:
+    #             mode = self.df[col].mode()
+
+    #             if not mode.empty:
+    #                 self.df[col] = self.df[col].fillna(mode.iloc[0])
+
+
+    #     else:
+    #         print(f"\nstrategy must be 'drop', 'mean', 'median', 'mode'")
 
     #     return self
+    
     
     def handle_outliers(self):
         print("\nHandling outliers")

@@ -5,7 +5,8 @@ from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 
 from Project.src.eda import EDA
-from Project.src.clean_data import CleanData
+from Project.src.datacleaning import CleanAllData
+# from Project.src.clean_data import CleanData
 from Project.src.exportToJson import Export
 from Project.Models.train import TrainModel
 
@@ -135,11 +136,11 @@ class LoadData:
 
             except ValueError:
                 print("Invalid input. Please enter a number.")
-
-
     
     def Preprocessing(self, dataset):         
-        clean_dataSet = CleanData(dataset)
+        # clean_dataSet = CleanData(dataset)
+        # cleaned_DF = clean_dataSet.clean()
+        clean_dataSet = CleanAllData(dataset)
         cleaned_DF = clean_dataSet.clean()
         while True:
             try:
@@ -160,21 +161,46 @@ class LoadData:
                     else:
                         print("Please choose 1 or 2")
                 
-                elif option_to_perforn_next_action == 3: # train data here
+                elif option_to_perforn_next_action == 3:  # Train model
+
                     json_file_path = self.OpenFileJson()
                     json_DF = pd.read_json(json_file_path)
-    
-                    target_column = input("\nEnter the name of the target column: ").strip()
-                    drop_columns = [
-                        "incident_id", "address", "latitude", "longitude", "incident_datetime", "officer_id", 
-                        "officer_first_name", "officer_last_name", "badge_number", "suspect_id", "suspect_first_name", 
-                        "suspect_last_name", "victim_id", "victim_first_name", "victim_last_name", "victim_phone", "notes"
-                    ]
 
-                    model_type_selected_classification = input("\nEnter the name of Classificaltion Model:\n1) decision_tree\n2) gradient_boosting\n3) random_forest\n4) catboost").strip()
+                    # Ask target column
+                    target_column = input(
+                        "\nEnter the target column: "
+                    ).strip()
+
+                    # Ask columns to drop
+                    drop_input = input(
+                        "\nEnter columns to drop (comma separated).\n"
+                        "Leave blank if none: "
+                    ).strip()
+
+                    if drop_input:
+                        drop_columns = [col.strip() for col in drop_input.split(",")]
+                    else:
+                     drop_columns = []
+
+                    # Create TrainModel object
+                    train_data = TrainModel(
+                        json_DF,
+                        target_column,
+                        columns_to_drop=drop_columns
+                    )
+
+                    # Check target type
+                    if train_data.is_target_categorical():
+                        model_type_selected_classification = input("\nEnter the name of Classificaltion Model:\n1) decision_tree\n2) gradient_boosting\n3) random_forest\n4) catboost\n5)all\t").strip()
                     
-                    train_data = TrainModel(json_DF, target_column, columns_to_drop = drop_columns, model_type=model_type_selected_classification)
+                    else:
+
+                        print("\nTarget is NUMERIC.")
+                        model_type_selected_classification = input("\nSelect Regression Model:\n1) linear_regression\n2) decision_tree\n3) random_forest\n4) gradient_boosting\n5) xgboost\n\nChoice: ").strip()
+
+                    train_data.model_type = model_type_selected_classification
                     train_data.select_model_type()
+
 
                 elif option_to_perforn_next_action == 4:
                     print("Exiting...")

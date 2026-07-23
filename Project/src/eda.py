@@ -27,10 +27,24 @@ class EDA:
         print("\nFEATURES DETAILS:")
         print("\nNumeric:", self.numeric_features)
         print("\nCategorical:", self.categorical_features)
+
+
               
     def summary_statistics(self):
         print(f"\nsummary_statistics of Dataset:\n")
         print(self.df.describe(include="all"))
+
+        missing_summary = pd.DataFrame({
+                "Missing Values": self.df.isnull().sum(),
+                "Percentage": (self.df.isnull().sum() / len(self.df)) * 100
+            })
+
+        missing_summary = missing_summary.sort_values(
+            by="Missing Values",
+            ascending=False
+        )
+        
+        print(missing_summary)
 
     
     def missing_values(self):
