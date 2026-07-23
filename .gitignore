@@ -32,8 +32,8 @@ MANIFEST
 *.manifest
 *.spec
 
-Datasets/
 catboost_info/
+Datasets/
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
