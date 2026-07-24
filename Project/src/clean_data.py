@@ -1,9 +1,18 @@
+                               
+
+
+                                ## ==========================================================================================================
+                                                #OLD FILE (BUT USEFUL FOR FUTURE FOR ITS GENERIC CAPABILITIES)
+                                ## ==========================================================================================================
+
+
 import pandas as pd
 import numpy as np
 
 
 # Class functionality :
 #     Remove Duplicates Rows 
+#     Remove Duplicates Columns
 #     Remove Empty rows or cols
 #     empty strings with NaN 
 #     Strip spaces

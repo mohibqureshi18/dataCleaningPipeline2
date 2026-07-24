@@ -5,8 +5,7 @@ from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 
 from Project.src.eda import EDA
-from Project.src.datacleaning import CleanAllData
-# from Project.src.clean_data import CleanData
+from Project.src.datacleaning import CleanData
 from Project.src.exportToJson import Export
 from Project.Models.train import TrainModel
 
@@ -41,21 +40,6 @@ class LoadData:
 
         self.selectOptionForDataset(df)
 
-    # def loadData(self):
-
-    #     Selected_dataset = int(input("\nSelect a dataset for research:"))
-
-    #     if(Selected_dataset == 1):
-    #         self.selectOptionForDataset(self.CrimeDastaset)
-
-    #     elif(Selected_dataset == 2):
-    #         self.selectOptionForDataset(self.Mushrooms)
-
-    #     else:
-    #         print("\nPlease select 1 or 2")
-
-
-    
 
     def selectOptionForDataset(self,  df):
         print("\nloading file...")
@@ -138,10 +122,9 @@ class LoadData:
                 print("Invalid input. Please enter a number.")
     
     def Preprocessing(self, dataset):         
-        # clean_dataSet = CleanData(dataset)
-        # cleaned_DF = clean_dataSet.clean()
-        clean_dataSet = CleanAllData(dataset)
+        clean_dataSet = CleanData(dataset)
         cleaned_DF = clean_dataSet.clean()
+       
         while True:
             try:
                 option_to_perforn_next_action = int(input("What do you want to do next: \n1) Analyze data \n2) export dataset \n3) Train \n4) Exit\t"))
@@ -196,7 +179,7 @@ class LoadData:
                     else:
 
                         print("\nTarget is NUMERIC.")
-                        model_type_selected_classification = input("\nSelect Regression Model:\n1) linear_regression\n2) decision_tree\n3) random_forest\n4) gradient_boosting\n5) xgboost\n\nChoice: ").strip()
+                        model_type_selected_classification = input("\nSelect Regression Model:\n1)linear_regression\nChoice:").strip()
 
                     train_data.model_type = model_type_selected_classification
                     train_data.select_model_type()
@@ -208,5 +191,6 @@ class LoadData:
                 else:
                     print("Please choose 1 or 2 or 3")
 
-            except ValueError:
-                print("Please enter a correct input...")
+            except Exception as e:
+                import traceback
+                traceback.print_exc()

@@ -134,14 +134,11 @@ class TrainModel:
         rmse = np.sqrt(mse)
         r2 = r2_score(self.y_test, prediction)
 
-        prediction = self.model.predict(self.X_test)
-
-        accuracy = accuracy_score(self.y_test, prediction)
-        print(f"\nAccuracy: {accuracy:.2%}")
-
+        
         print(f"\nEVALUATION RESULT")
         print(f"MAE : {mae:.4f}")
         print(f"MSE : {mse:.4f}")
+        print(f"RMSE : {rmse:.4f}")
         print(f"R²  : {r2:.4f}\n")
 
     def encode_data(self):

@@ -2,112 +2,13 @@ import pandas as pd
 import pandas as pd
 import numpy as np
 
-class CleanAllData:
+
+class CleanData:
+
     def __init__(self, df):
         self.df = df
 
-    # Check for remaining missing values
-    def remove_empty(self):
-        self.df = self.df.dropna()
-        self.df.isnull().sum()
-        self.text_columns = self.df.select_dtypes(include = "object").columns
-
-        return self
-
-    def handle_outliers(self):
-            print("\nHandling outliers")
-            
-            removed_in_pass = -1
-            pass_count = 1
-            
-            while removed_in_pass != 0:
-                before_total = len(self.df)
-                print(f"\n--- Outlier Pass {pass_count} ---")
-                
-                for col in self.df.select_dtypes(include="number").columns:
-                    Q1 = self.df[col].quantile(0.25)
-                    Q3 = self.df[col].quantile(0.75)
-                    IQR = Q3 - Q1
-
-                    lower = Q1 - 1.5 * IQR
-                    upper = Q3 + 1.5 * IQR
-
-                    before_col = len(self.df)
-                    self.df = self.df[
-                        (self.df[col] >= lower) & (self.df[col] <= upper)
-                    ]
-                    removed = before_col - len(self.df)
-                    if removed > 0:
-                        print(f"{col}: Removed {removed} outlier(s)")
-
-                removed_in_pass = before_total - len(self.df)
-                pass_count += 1
-                
-            print("\nAll outliers successfully handled across passes.")
-            return self
-
-    def remove_duplicates_rows(self):
-    
-        duplicate_rows = self.df.duplicated().sum()
-
-        print("Number of duplicate rows:", duplicate_rows)
-
-        self.df[self.df.duplicated().T]
-        print("New Shape:", self.df.shape)
-
-        # Remove exact duplicate rows
-        self.df = self.df.drop_duplicates()
-
-        print("New Shape:", self.df.shape)
-
-        # Count duplicate incident IDs
-        duplicate_ids = self.df["incident_id"].duplicated().sum()
-
-        print("Duplicate Incident IDs:", duplicate_ids)
-
-        self.df = self.df.drop_duplicates(subset="incident_id", keep="first")
-
-        print("Duplicate Rows:", self.df.duplicated().sum())
-        print("Duplicate Incident IDs:", self.df["incident_id"].duplicated().sum())
-
-        return self
-
-    
-    def strip_spaces(self):
-        # Remove leading and trailing spaces from all text columns
-        for col in self.text_columns:
-            self.df[col] = self.df[col].str.strip()
-
-        self.df.head()
-        return self
-
-
-    def standardize_text(self):
-        categorical_columns = [
-            "crime_type",
-            "district",
-            "city",
-            "state",
-            "suspect_gender",
-            "victim_gender",
-            "suspect_race",
-            "weapon_used",
-            "severity",
-            "case_status",
-            "resolution"
-        ]
-
-        for col in categorical_columns:
-            self.df[col] = self.df[col].str.title()
-
-        for col in categorical_columns:
-            print(f"\n{col}")
-            print(self.df)
-
-        for col in self.text_columns:
-            self.df[col] = self.df[col].str.replace(r"\s+", " ", regex=True)
-
-        gender_map = {
+        self.gender_map = {
             "M": "Male",
             "Male": "Male",
             "MALE": "Male",
@@ -118,7 +19,7 @@ class CleanAllData:
             "Unknown": "Unknown"
         }
 
-        reported_online_map = {
+        self.reported_online_map = {
             "YES": True,
             "Yes": True,
             "yes": True,
@@ -138,8 +39,21 @@ class CleanAllData:
             "false": False,
             "0": False
         }
+        self.case_status_map = {
+            "closed": "Closed",
+            "Closed": "Closed",
+            "CLOSED": "Closed",
+            "open": "Open",
+            "Open": "Open",
+            "OPEN": "Open",
+            "Under Investigation": "Under Investigation",
+            "under investigation": "Under Investigation",
+            "Investgation": "Under Investigation",
+            "Pending": "Pending",
+            "Pendng": "Pending"
+}
 
-        severity_map = {
+        self.severity_map = {
             "LOW": "Low",
             "Low": "Low",
             "low": "Low",
@@ -158,8 +72,7 @@ class CleanAllData:
             "4": "Critical"
         }
 
-
-        crime_type_map = {
+        self.crime_type_map = {
             "Homocide": "Homicide",
             "B&E": "Burglary",
             "Trespass": "Trespass",
@@ -221,130 +134,21 @@ class CleanAllData:
             "Armed Robbery": "Armed Robbery"
         }
 
-
-        self.df["suspect_gender"] = self.df["suspect_gender"].replace(gender_map)
-        self.df["reported_online"] = self.df["reported_online"].replace(reported_online_map).astype(bool)
-        self.df["victim_gender"] = self.df["victim_gender"].replace(gender_map)
-        self.df["severity"] = self.df["severity"].replace(severity_map)
-        self.df["crime_type"] = self.df["crime_type"].replace(crime_type_map)
-
-        print(self.df["suspect_gender"].unique())
-        print(self.df["victim_gender"].unique())
-        print(self.df["reported_online"].unique())
-        print(self.df["severity"].unique())
-        print(self.df["crime_type"].unique())
-
-        # self.df["crime_type"] = self.df["crime_type"].str.title()
-        print(self.df)
-        return self
-    
-        
-
-
-    def correct_invalid_values(self):
-        invalid_suspect_age = self.df[
-            (self.df["suspect_age"] < 0) |
-            (self.df["suspect_age"] > 120)
+        self.categorical_columns = [
+            "crime_type",
+            "district",
+            "city",
+            "state",
+            "suspect_gender",
+            "victim_gender",
+            "suspect_race",
+            "weapon_used",
+            "severity",
+            "case_status",
+            "resolution"
         ]
 
-        invalid_victim_age = self.df[
-            (self.df["victim_age"] < 0) |
-            (self.df["victim_age"] > 120)
-        ]
-
-        print(invalid_suspect_age)
-        print(invalid_victim_age)
-
-        self.df = self.df[
-            (self.df["suspect_age"].between(0, 120)) &
-            (self.df["victim_age"].between(0, 120))
-        ]
-
-        invalid_coordinates = self.df[
-            (~self.df["latitude"].between(-90, 90)) |
-            (~self.df["longitude"].between(-180, 180))
-        ]
-
-        print(invalid_coordinates)
-
-        self.df = self.df[
-            self.df["latitude"].between(-90, 90) &
-            self.df["longitude"].between(-180, 180)
-        ]
-
-        print(self.df["property_loss_usd"].dtype)
-
-        self.df["property_loss_usd"].unique()[:20]
-
-        self.df["property_loss_usd"] = (
-            self.df["property_loss_usd"]
-            .astype(str)
-            .str.replace("$", "", regex=False)
-            .str.replace(",", "", regex=False)
-        )
-
-        self.df["property_loss_usd"] = pd.to_numeric(
-            self.df["property_loss_usd"],
-            errors="coerce"
-        )
-
-        print(self.df["property_loss_usd"].dtype)
-
-        print(self.df["property_loss_usd"].isnull().sum())
-
-        self.df = self.df.dropna()
-
-        print(self.df["property_loss_usd"].isnull().sum())
-
-        self.df[self.df["property_loss_usd"] < 0]
-
-        self.df = self.df[self.df["property_loss_usd"] >= 0]
-
-        self.df[self.df["num_arrests"] < 0]
-
-        self.df = self.df[self.df["num_arrests"] >= 0]
-        
-        self.df["victim_phone"] = (
-            self.df["victim_phone"]
-            .astype(str)
-            .str.replace(r"\D", "", regex=True)
-        )
-
-        self.df = self.df[self.df["victim_phone"].str.len() == 10]
-
-        self.df["victim_phone"].head()
-    
-        print(self.df["suspect_age"].between(0, 120).all())
-        print(self.df["victim_age"].between(0, 120).all())
-
-        print(self.df["latitude"].between(-90, 90).all())
-        print(self.df["longitude"].between(-180, 180).all())
-
-        print((self.df["property_loss_usd"] >= 0).all())
-        print((self.df["num_arrests"] >= 0).all())
-
-        return self
-
-
-    def date_time_correct(self):
-
-        self.df["incident_datetime"] = pd.to_datetime(
-            self.df["incident_datetime"],
-            errors="coerce"
-        )
-        self.df = self.df.dropna(subset=["incident_datetime"])
-        (self.df["incident_datetime"].dtype)
-
-        return self
-    
-
-    # self.df["reported_online"].unique()
-
-    def type_conversion(self):
-
-        print(self.df.dtypes)
-
-        numeric_columns = [
+        self.numeric_columns = [
             "suspect_age",
             "victim_age",
             "latitude",
@@ -353,49 +157,304 @@ class CleanAllData:
             "property_loss_usd"
         ]
 
+
+    def explore_data(self):
+        df = self.df
+        print("SHAPE:")
+        print(" ")
+        print(df.shape)
+        print("INFO:")
+        print(" ")
+        print(df.info())
+        print("HEAD:")
+        print(" ")
+        print(df.head())
+        print("DESCRIBE:")
+        print(" ")
+        print(df.describe(include="all"))
+        print(" ")
+        print("DATA_TYPES:")
+        print(df.dtypes)
+
+    def handle_missing_values(self):
+        df = self.df
+
+        missing_summary = pd.DataFrame({
+            "Missing Values": df.isnull().sum(),
+            "Percentage": (df.isnull().sum() / len(df)) * 100
+        })
+
+        missing_summary = missing_summary.sort_values(
+            by="Missing Values",
+            ascending=False
+        )
+
+        print(missing_summary)
+
+        df = df.dropna()
+
+        # Check for remaining missing values
+        df.isnull().sum()
+
+        self.df = df
+
+    def remove_duplicates(self):
+        df = self.df
+
+        duplicate_rows = df.duplicated().sum()
+
+        print("Number of duplicate rows:", duplicate_rows)
+
+        df[df.duplicated().T]
+        print("New Shape:", df.shape)
+
+        # Remove exact duplicate rows
+        df = df.drop_duplicates()
+
+        print("New Shape:", df.shape)
+
+        # Count duplicate incident IDs
+        duplicate_ids = df["incident_id"].duplicated().sum()
+
+        print("Duplicate Incident IDs:", duplicate_ids)
+
+        df = df.drop_duplicates(subset="incident_id", keep="first")
+
+        print("Duplicate Rows:", df.duplicated().sum())
+        print("Duplicate Incident IDs:", df["incident_id"].duplicated().sum())
+
+        self.df = df
+
+    def clean_text_columns(self):
+        df = self.df
+
+        text_columns = df.select_dtypes(include="object").columns
+
+        for col in text_columns:
+            df[col] = df[col].str.strip()
+
+        df.head()
+
+        categorical_columns = self.categorical_columns
+
+        for col in categorical_columns:
+            df[col] = df[col].str.title()
+
+        for col in categorical_columns:
+            print(f"\n{col}")
+            print(df[col].unique())
+
+        for col in text_columns:
+            df[col] = df[col].str.replace(r"\s+", " ", regex=True)
+
+        self.df = df
+
+    def map_categorical_values(self):
+        df = self.df
+
+        df["suspect_gender"] = df["suspect_gender"].replace(self.gender_map)
+        df["reported_online"] = df["reported_online"].replace(self.reported_online_map).astype(bool)
+        df["victim_gender"] = df["victim_gender"].replace(self.gender_map)
+        df["severity"] = df["severity"].replace(self.severity_map)
+        df["crime_type"] = df["crime_type"].replace(self.crime_type_map)
+        df["case_status"] = df["case_status"].replace(self.case_status_map)
+
+        print(df["suspect_gender"].unique())
+        print(df["victim_gender"].unique())
+        print(df["reported_online"].unique())
+        print(df["severity"].unique())
+        print(df["crime_type"].unique())
+
+        df["case_status"] = df["case_status"].str.title()
+
+        df["crime_type"] = df["crime_type"].str.title()
+        print(df["crime_type"].unique())
+
+        self.df = df
+
+    def correct_invalid_ages(self):
+        """# Step 5 – Correct Invalid Values"""
+        df = self.df
+
+        invalid_suspect_age = df[
+            (df["suspect_age"] < 0) |
+            (df["suspect_age"] > 120)
+        ]
+
+        invalid_victim_age = df[
+            (df["victim_age"] < 0) |
+            (df["victim_age"] > 120)
+        ]
+
+        print(invalid_suspect_age)
+        print(invalid_victim_age)
+
+        df = df[
+            (df["suspect_age"].between(0, 120)) &
+            (df["victim_age"].between(0, 120))
+        ]
+
+        self.df = df
+
+    def correct_invalid_coordinates(self):
+        df = self.df
+
+        invalid_coordinates = df[
+            (~df["latitude"].between(-90, 90)) |
+            (~df["longitude"].between(-180, 180))
+        ]
+
+        print(invalid_coordinates)
+
+        df = df[
+            df["latitude"].between(-90, 90) &
+            df["longitude"].between(-180, 180)
+        ]
+
+        self.df = df
+
+    def clean_property_loss(self):
+        df = self.df
+
+        print(df["property_loss_usd"].dtype)
+
+        df["property_loss_usd"].unique()[:20]
+
+        df["property_loss_usd"] = (
+            df["property_loss_usd"]
+              .astype(str)
+              .str.replace("$", "", regex=False)
+              .str.replace(",", "", regex=False)
+        )
+
+        df["property_loss_usd"] = pd.to_numeric(
+            df["property_loss_usd"],
+            errors="coerce"
+        )
+
+        print(df["property_loss_usd"].dtype)
+
+        print(df["property_loss_usd"].isnull().sum())
+
+        df = df.dropna()
+
+        print(df["property_loss_usd"].isnull().sum())
+
+        df[df["property_loss_usd"] < 0]
+
+        df = df[df["property_loss_usd"] >= 0]
+
+        self.df = df
+
+    def clean_num_arrests(self):
+        df = self.df
+
+        df[df["num_arrests"] < 0]
+
+        df = df[df["num_arrests"] >= 0]
+
+        self.df = df
+
+    def clean_datetime(self):
+        df = self.df
+
+        df["incident_datetime"] = pd.to_datetime(
+            df["incident_datetime"],
+            errors="coerce"
+        )
+
+        df = df.dropna(subset=["incident_datetime"])
+
+        (df["incident_datetime"].dtype)
+
+        df["reported_online"].unique()
+
+        self.df = df
+
+    def clean_phone_numbers(self):
+        df = self.df
+
+        df["victim_phone"] = (
+            df["victim_phone"]
+              .astype(str)
+              .str.replace(r"\D", "", regex=True)
+        )
+
+        df = df[df["victim_phone"].str.len() == 10]
+
+        df["victim_phone"].head()
+
+        print(df["suspect_age"].between(0, 120).all())
+        print(df["victim_age"].between(0, 120).all())
+
+        print(df["latitude"].between(-90, 90).all())
+        print(df["longitude"].between(-180, 180).all())
+
+        print((df["property_loss_usd"] >= 0).all())
+        print((df["num_arrests"] >= 0).all())
+
+        self.df = df
+
+    def convert_data_types(self):
+        """# Step 6: Data Type Conversion and Final Validation"""
+        df = self.df
+
+        print(df.dtypes)
+
+        numeric_columns = self.numeric_columns
+
         for col in numeric_columns:
-            self.df[col] = pd.to_numeric(self.df[col], errors="coerce")
+            df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        self.df["suspect_age"] = self.df["suspect_age"].astype(int)
-        self.df["victim_age"] = self.df["victim_age"].astype(int)
-        self.df["num_arrests"] = self.df["num_arrests"].astype(int)
+        df["suspect_age"] = df["suspect_age"].astype(int)
+        df["victim_age"] = df["victim_age"].astype(int)
+        df["num_arrests"] = df["num_arrests"].astype(int)
 
-        self.df.dropna(subset=["incident_datetime"], inplace=True)
-        self.df.dropna(subset=["reported_online"], inplace=True)
-        self.df.dropna(subset=["suspect_gender"], inplace=True)
-        self.df.dropna(subset=["victim_gender"], inplace=True)
-        self.df.dropna(subset=["severity"], inplace=True)
-        self.df.dropna(subset=["crime_type"], inplace=True)
+        df.dropna(subset=["incident_datetime"], inplace=True)
+        df.dropna(subset=["reported_online"], inplace=True)
+        df.dropna(subset=["suspect_gender"], inplace=True)
+        df.dropna(subset=["victim_gender"], inplace=True)
+        df.dropna(subset=["severity"], inplace=True)
+        df.dropna(subset=["crime_type"], inplace=True)
 
-        self.df["reported_online"].value_counts()
+        df["reported_online"].value_counts()
 
-        print(self.df.dtypes)
+        print(df.dtypes)
 
-        return self
+        self.df = df
 
-    def quality_check(self):
-            
-        print("Total Missing Values:", self.df.isnull().sum().sum())
+    def final_validation(self):
+        df = self.df
 
-        print("Duplicate Rows:", self.df.duplicated().sum())
+        print("Total Missing Values:", df.isnull().sum().sum())
 
-        print("Suspect Age Valid:", self.df["suspect_age"].between(0, 120).all())
-        print("Victim Age Valid:", self.df["victim_age"].between(0, 120).all())
-        print("Latitude Valid:", self.df["latitude"].between(-90, 90).all())
-        print("Longitude Valid:", self.df["longitude"].between(-180, 180).all())
-        print("Property Loss Valid:", (self.df["property_loss_usd"] >= 0).all())
-        print("Arrests Valid:", (self.df["num_arrests"] >= 0).all())
+        print("Duplicate Rows:", df.duplicated().sum())
 
-        self.df.info()
+        print("Suspect Age Valid:", df["suspect_age"].between(0, 120).all())
+        print("Victim Age Valid:", df["victim_age"].between(0, 120).all())
+        print("Latitude Valid:", df["latitude"].between(-90, 90).all())
+        print("Longitude Valid:", df["longitude"].between(-180, 180).all())
+        print("Property Loss Valid:", (df["property_loss_usd"] >= 0).all())
+        print("Arrests Valid:", (df["num_arrests"] >= 0).all())
 
-        return self
+        df.info()
+
+        self.df = df
+
 
     def clean(self):
-        print("\nCleaning Dataset...")
-
-        self.remove_empty() .handle_outliers() .remove_duplicates_rows() .strip_spaces()
-        self.standardize_text() .correct_invalid_values() .date_time_correct() .type_conversion()
-        self.quality_check()
-        print("\nCleaning Completed")
-           
+        self.explore_data()
+        self.handle_missing_values()
+        self.remove_duplicates()
+        self.clean_text_columns()
+        self.map_categorical_values()
+        self.correct_invalid_ages()
+        self.correct_invalid_coordinates()
+        self.clean_property_loss()
+        self.clean_num_arrests()
+        self.clean_datetime()
+        self.clean_phone_numbers()
+        self.convert_data_types()
+        self.final_validation()
+        
         return self.df
