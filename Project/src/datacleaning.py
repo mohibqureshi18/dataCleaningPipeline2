@@ -273,7 +273,7 @@ class CleanData:
         self.df = df
 
     def correct_invalid_ages(self):
-        """# Step 5 – Correct Invalid Values"""
+        """# Step 5 Correct Invalid Values"""
         df = self.df
 
         invalid_suspect_age = df[
